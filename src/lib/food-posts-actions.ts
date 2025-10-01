@@ -27,8 +27,8 @@ function getStoragePathFromPublicUrl(url?: string | null) {
     const objectSegments = segments.slice(bucketIndex + 1).map((segment) => {
       try {
         return decodeURIComponent(segment);
-      } catch (error) {
-        console.warn("Failed to decode storage path segment", segment, error);
+      } catch (decodeError) {
+        console.warn("Failed to decode storage path segment", segment, decodeError);
         return segment;
       }
     });
@@ -62,21 +62,19 @@ async function uploadPhoto(file: File, userId: string) {
     const normalizedMessage = uploadError.message?.toLowerCase?.() ?? "";
     const bucketMissingMessage = `Storage bucket "${bucket}" was not found. Create it in Supabase Storage (or set NEXT_PUBLIC_SUPABASE_BUCKET).`;
 
-    if (normalizedMessage.includes("bucket") || uploadError.statusCode === "404") {
+    if (normalizedMessage.includes("bucket") || normalizedMessage.includes("404")) {
       throw new Error(bucketMissingMessage);
     }
 
     throw new Error(uploadError.message || "Unable to upload photo. Please try again.");
   }
 
-  const {
-    data: { publicUrl },
-    error: urlError,
-  } = supabase.storage.from(bucket).getPublicUrl(objectPath);
+  const { data } = supabase.storage.from(bucket).getPublicUrl(objectPath);
+  const publicUrl = data.publicUrl;
 
-  if (urlError) {
-    console.error("Failed to generate public URL", urlError);
-    throw new Error(urlError.message || "Unable to get photo URL. Please try again.");
+  if (!publicUrl) {
+    console.error("Supabase did not return a public URL for", objectPath);
+    throw new Error("Unable to get photo URL. Please try again.");
   }
 
   return { publicUrl, path: objectPath };

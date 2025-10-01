@@ -3,12 +3,19 @@ import { currentUser } from "@clerk/nextjs/server";
 import { getFoodPostByIdForCurrentUser } from "@/lib/food-posts";
 import { PostDetail } from "@/components/posts/post-detail";
 
-interface PostPageProps {
-  params: { id: string };
-}
+type PostPageProps = {
+  params?: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[]>>;
+};
 
 export default async function PostPage({ params }: PostPageProps) {
-  const { id } = params;
+  const resolvedParams = params ? await params : null;
+
+  if (!resolvedParams) {
+    notFound();
+  }
+
+  const { id } = resolvedParams;
   const user = await currentUser();
 
   if (!user) {
