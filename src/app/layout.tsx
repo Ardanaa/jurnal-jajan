@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Parkinsans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,9 +21,9 @@ const parkinsans = Parkinsans({
 });
 
 export const metadata: Metadata = {
-  title: "CodeGuide Starter Kit",
+  title: "Jurnal Jajan",
   description:
-    "A modern Next.js starter with TypeScript, TailwindCSS, shadcn/ui, Vercel AI SDK, Clerk, and Supabase",
+    "Capture food adventures with your partner using a private, modern journal.",
 };
 
 export default function RootLayout({
@@ -43,6 +44,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Toaster position="top-center" richColors />
           </ThemeProvider>
         </body>
       </html>
